@@ -1,8 +1,54 @@
 [package]
 name = "zero2prod"
 version = "0.1.0"
+authors = ["Weiyu Wan <weiyu.wan@gmail.com>"]
 edition = "2021"
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "zero2prod"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tracing = {version = "0.1", features = ["log"]}
+tracing-subscriber = {version="0.3", features=["registry", "env-filter"]}
+tracing-log = "0.1"
+tracing-actix-web = "0.6.2"
+config = "0.13.2"
+actix-web = "4"
+tokio = {version = "1", features = ["macros", "rt-multi-thread"]}
+serde = {version = "1", features = ["derive"]}
+dotenv = "0.15.0"
+uuid = {version = "1.2.1", features = ["v4"]}
+chrono = "0.4.15"
+tracing-bunyan-formatter = "0.3"
+serde-aux = "4"
+secrecy = {version = "0.8", features= ["serde"]}
+
+[dependencies.sqlx]
+version = "0.6.2"
+default-features = false
+features = [
+    "runtime-actix-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+    "offline",
+]
+
+
+[dev-dependencies]
+reqwest = "0.11"
+once_cell = "1"
+
+
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-fuse-ld=/usr/local/bin/zld"]
