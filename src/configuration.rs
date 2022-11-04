@@ -5,13 +5,13 @@ use sqlx::postgres::PgConnectOptions;
 use sqlx::postgres::PgSslMode;
 use sqlx::ConnectOptions;
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
 pub struct Settings {
     pub database: DatabaseSettings,
     pub application: ApplicationSettings,
 }
 
-#[derive(serde::Deserialize)]
+#[derive(serde::Deserialize, Debug)]
 pub struct ApplicationSettings {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub port: u16,
@@ -43,10 +43,40 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .add_source(
             config::File::from(configuration_directory.join(environment.as_str())).required(true),
         )
-        .add_source(config::Environment::with_prefix("app").separator("__"))
+        .add_source(
+            config::Environment::with_prefix("APP")
+                .prefix_separator("_")
+                .separator("__"),
+        )
         .build()?;
     configuration.try_deserialize()
 }
+
+// pub fn get_configuration() -> Result<Settings, config::ConfigError> {
+//     let mut settings = config::Config::default();
+//     let base_path = std::env::current_dir().expect("Failed to determine the current directory");
+//     let configuration_directory = base_path.join("configuration");
+//     settings.merge(config::File::from(configuration_directory.join("base")).required(true))?;
+//     let environment: Environment = std::env::var("APP_ENVIRONMENT")
+//         .unwrap_or_else(|_| "local".into())
+//         .try_into()
+//         .expect("Failed to parse APP_ENVIRONMENT.");
+//     settings.merge(
+//         config::File::from(configuration_directory.join(environment.as_str())).required(true),
+//     )?;
+//     // Add in settings from environment variables (with a prefix of APP and '__' as separator) // E.g. `APP_APPLICATION__PORT=5001 would set `Settings.application.port`
+//     std::env::set_var(
+//         "APP_DATABASE__FOO",
+//         "I HAVE BEEN OVERRIDDEN_WITH_UPPER_CASE",
+//     );
+//     let env_var = config::Environment::with_prefix("APP")
+//         .prefix_separator("_")
+//         .separator("__");
+//     //println!("{:?}", env_var);
+//     settings.merge(env_var)?;
+//     println!("{:?}", settings);
+//     settings.try_deserialize()
+// }
 
 pub enum Environment {
     Local,
